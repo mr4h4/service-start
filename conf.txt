@@ -1,0 +1,20 @@
+authoritative; #Definir al SV como principal para ese segmento de red.
+one-lease-per-client-on; #Define una IP por host.
+server-identifier (IP): #Indica el nodo que alberga el servicio.
+default-lease-time; #Indica el tiempo de asignación en segundos.
+option subnet-mask; #Indica la máscara de red.
+option broadcast-address; #Indica el broadcast.
+option routers; #Indica el gateway.
+option domain-name servers; #Servidores DNS.
+option domain-name ("dom"); #Indica el dominio.
+subnet (dir. red) netmask (máscara) {
+range x.x. x.y x.x.x.z;
+}
+host dns { #Define la entrada de un host.
+hardware Ethernet (MAC); #Dispositivo que recibirá la IP estática.
+Fixed-address (IP); #Establece la IP que se asignará al dispositivo con el MAC asignado.
+}
+
+service isp-dhcp-server start #Iniciar servicio
+service isp-dhcp-server status #Ver estado actual
+sudo tail -f /var/log/syslog #Ver logs
