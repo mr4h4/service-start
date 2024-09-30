@@ -22,7 +22,7 @@ dhcpconf() { #Leer configuración (inputs)
     read -p "server-identifier >> " identifier #Leer identificador del servidor
     read -p "default-lease-time >> " leasetime #Indica el tiempo de asignación en segundos
     read -p "option subnet-mask >> " subnetmask #Indica la máscara de red
-    read -p "option broadcast-addressnan >> " broadcast #Indica el broadcast
+    read -p "option broadcast-address >> " broadcast #Indica el broadcast
     read -p "option router >> " gateway #Indica el gateway
 
     startservice
@@ -46,7 +46,7 @@ startservice(){ #Configurar el servicio DHCP (outpouts)
     echo "server-identifier $identifier;" | sudo tee -a /etc/dhcp/dhcpd.conf #Indica el nodo que alberga el servicio.
     echo "default-lease-time $leasetime;" | sudo tee -a /etc/dhcp/dhcpd.conf #Indica el tiempo de asignación en segundos.
     echo "option subnet-mask $subnetmask;" | sudo tee -a /etc/dhcp/dhcpd.conf #Indica la máscara de red
-    echo "option broadcast-address; $broadcast;" | sudo tee -a /etc/dhcp/dhcpd.conf #indica el broadcast
+    echo "option broadcast-address $broadcast;" | sudo tee -a /etc/dhcp/dhcpd.conf #indica el broadcast
     echo "option routers $gateway;" | sudo tee -a /etc/dhcp/dhcpd.conf #Indica el gateway
     echo "" | sudo tee -a /etc/dhcp/dhcpd.conf 
 
