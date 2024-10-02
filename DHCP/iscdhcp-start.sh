@@ -4,8 +4,9 @@
 
 # Script Name: isc-dhcp-start
 # Description: Automatiza la instalación, configuración final y puesta en marcha de un servicio DHCP. (Linux Mint)
-# Version: 0.1 
-# Author:
+# PD: cuando se ejecute el script entrar a la configuracion del DHCP y poner en la parte de arriba #dhcpd.conf
+# Version: 0.2
+# Author: Bryan
 
 # ===== Functions ===== # ===== Funciones =====
 comprobar_isc_dhcp() { # Función para comprobar si el paquete isc-dhcp-server está instalado
@@ -21,15 +22,16 @@ comprobar_isc_dhcp() { # Función para comprobar si el paquete isc-dhcp-server e
 dhcpconf() { #Leer configuración (inputs)
     read -p "server-identifier >> " identifier #Leer identificador del servidor
     read -p "default-lease-time >> " leasetime #Indica el tiempo de asignación en segundos
+    read -p "max-lease-time >> " leasetime #Indica el tiempo de maximo de asignación en segundos
     read -p "option subnet-mask >> " subnetmasksv #Indica la máscara de red
     read -p "option broadcast-address >> " broadcast #Indica el broadcast
     read -p "option router >> " gateway #Indica el gateway
     read -p "option domain-name servers >> " dns #Servidores DNS
     read -p "option domain-name >> " dominio #Indica el dominio
     read -p "subnet (dir.red) >> " dirRed 
-    read -p "subnet $dirRed netmask (netmask) >> " netmask
-    read -p "range (first) >> " rangoA 
-    read -p "range (last) >> " rangoB
+    read -p "subnet $dirRed netmask (netmask) >> " netmask #Indica la mascara de la red
+    read -p "range (first) >> " rangoA #Indica el rango de IP A
+    read -p "range (last) >> " rangoB #Idica el rango de IP B
 
     startservice
 }
@@ -71,8 +73,8 @@ startservice(){ #Configurar el servicio DHCP (outpouts)
     echo "option routers $gateway;" | sudo tee -a /etc/dhcp/dhcpd.conf #Indica el gateway
     echo "option domain-name servers $dns;" | sudo tee -a /etc/dhcp/dhcpd.conf #Servidores DNS
     echo "option domain-name $dominio;" | sudo tee -a /etc/dhcp/dhcpd.conf #Indica el dominio
-    echo "subnet $dirRed netmask $netmask {" | sudo tee -a /etc/dhcp/dhcpd.conf
-    echo "range $rangoA $rangoB;" | sudo tee -a /etc/dhcp/dhcpd.conf 
+    echo "subnet $dirRed netmask $netmask {" | sudo tee -a /etc/dhcp/dhcpd.conf #Identifica la mascara de la red
+    echo "range $rangoA $rangoB;" | sudo tee -a /etc/dhcp/dhcpd.conf #Identifica en rango de IPs
     echo "}" | sudo tee -a /etc/dhcp/dhcpd.conf
 
     echo "Servicio DHCP configurado correctamente"
@@ -103,7 +105,6 @@ else
     sleep 2
     confyesornot
 fi
-
 
 # ===== Global Variables ===== # ===== Variables globales =====
 
