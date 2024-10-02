@@ -48,11 +48,12 @@ confyesornot() {
 
 startyesornot() {
     read -p "¿Quiere iniciar directamente el servicio? (y/n) >> " startyesno
-    if [[ $confyesno == "y" || $confyesno == "Y" ]]; then
+    if [[ $startyesno == "y" || $startyesno == "Y" ]]; then
         service isp-dhcp-server start #Iniciar servicio
         service isp-dhcp-server status #Ver estado actual
         sudo tail -f /var/log/syslog #Ver logs
-    elif [[ $confyesno == "n" || $confyesno == "N" ]]; then
+        echo "Servicio iniciado correctamente"
+    elif [[ $startyesno == "n" || $startyesno == "N" ]]; then
         return 0  # Salir sin hacer nada
     else
         echo "Parámetro inválido. Inserte (y/n)"
