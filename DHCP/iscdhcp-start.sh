@@ -21,9 +21,15 @@ comprobar_isc_dhcp() { # Función para comprobar si el paquete isc-dhcp-server e
 dhcpconf() { #Leer configuración (inputs)
     read -p "server-identifier >> " identifier #Leer identificador del servidor
     read -p "default-lease-time >> " leasetime #Indica el tiempo de asignación en segundos
-    read -p "option subnet-mask >> " subnetmask #Indica la máscara de red
+    read -p "option subnet-mask >> " subnetmasksv #Indica la máscara de red
     read -p "option broadcast-address >> " broadcast #Indica el broadcast
     read -p "option router >> " gateway #Indica el gateway
+    read -p "option domain-name servers >> " dns #Servidores DNS
+    read -p "option domain-name >> " dominio #Indica el dominio
+    read -p "subnet (dir.red) >> " dirRed 
+    read -p "subnet $dirRed netmask (netmask) >> " netmask
+    read -p "range (first) >> " rangoA 
+    read -p "range (last) >> " rangoB
 
     startservice
 }
@@ -40,17 +46,39 @@ confyesornot() {
     fi
 }
 
+startyesornot() {
+    read -p "¿Quiere iniciar directamente el servicio? (y/n) >> " startyesno
+    if [[ $confyesno == "y" || $confyesno == "Y" ]]; then
+        service isp-dhcp-server start #Iniciar servicio
+        service isp-dhcp-server status #Ver estado actual
+        sudo tail -f /var/log/syslog #Ver logs
+    elif [[ $confyesno == "n" || $confyesno == "N" ]]; then
+        return 0  # Salir sin hacer nada
+    else
+        echo "Parámetro inválido. Inserte (y/n)"
+        startyesornot  # Llama a la función nuevamente
+    fi
+}
+
 startservice(){ #Configurar el servicio DHCP (outpouts)
     echo "authoritative;" | sudo tee -a /etc/dhcp/dhcpd.conf #Definir al SV como principal para ese segmento de red. (default)
     echo "one-lease-per-client-on;" | sudo tee -a /etc/dhcp/dhcpd.conf #Define una IP por host.
     echo "server-identifier $identifier;" | sudo tee -a /etc/dhcp/dhcpd.conf #Indica el nodo que alberga el servicio.
     echo "default-lease-time $leasetime;" | sudo tee -a /etc/dhcp/dhcpd.conf #Indica el tiempo de asignación en segundos.
-    echo "option subnet-mask $subnetmask;" | sudo tee -a /etc/dhcp/dhcpd.conf #Indica la máscara de red
+    echo "option subnet-mask $subnetmasksv;" | sudo tee -a /etc/dhcp/dhcpd.conf #Indica la máscara de red
     echo "option broadcast-address $broadcast;" | sudo tee -a /etc/dhcp/dhcpd.conf #indica el broadcast
     echo "option routers $gateway;" | sudo tee -a /etc/dhcp/dhcpd.conf #Indica el gateway
-    echo "" | sudo tee -a /etc/dhcp/dhcpd.conf 
+    echo "option domain-name servers $dns;" | sudo tee -a /etc/dhcp/dhcpd.conf #Servidores DNS
+    echo "option domain-name $dominio;" | sudo tee -a /etc/dhcp/dhcpd.conf #Indica el dominio
+    echo "subnet $dirRed netmask $netmask {" | sudo tee -a /etc/dhcp/dhcpd.conf
+    echo "range $rangoA $rangoB;" | sudo tee -a /etc/dhcp/dhcpd.conf 
+    echo "}" | sudo tee -a /etc/dhcp/dhcpd.conf
 
-    #echo "server-identifier $identifier;" | sudo tee -a /etc/dhcp/dhcpd.conf 
+    echo "Servicio DHCP configurado correctamente"
+    sleep 2
+    startyesornot
+
+    
 }
 ## ===== Start ===== ## ===== Inicio =====
 sudo chmod +rwx tu_script.sh
