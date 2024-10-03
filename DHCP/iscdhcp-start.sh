@@ -45,6 +45,7 @@ confyesornot() {
 startyesornot() {
     read -p "¿Quiere iniciar directamente el servicio? (y/n) >> " startyesno
     if [[ $startyesno == "y" || $startyesno == "Y" ]]; then
+        service isp-dhcp-server restart # Reiniciar servicio
         service isp-dhcp-server start # Iniciar servicio
         service isp-dhcp-server status # Ver estado actual
         sudo tail -f /var/log/syslog & # Ver logs en segundo plano
