@@ -3,8 +3,8 @@
 # ===== General Information =====
 # Script Name: isc-dhcp-start
 # Description: Automatiza la instalación, configuración final y puesta en marcha de un servicio DHCP. (Linux Mint)
-# Version: 0.1 
-# Author:
+# Version: 2.0
+# Author: mr4h4 - h3rhex
 
 # ===== Functions =====
 comprobar_isc_dhcp() { 

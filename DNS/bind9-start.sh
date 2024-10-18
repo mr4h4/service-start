@@ -3,15 +3,15 @@
 # ===== General Information =====
 # Script Name: bind9-start
 # Description: Automatiza la instalación, configuración final y puesta en marcha de un servicio DNS. (Linux Mint)
-# Version: 0.2 
-# Author: [Tu Nombre]
+# Version: 2.0
+# Author: mr4h4 - h3rhex
 
 # ===== Functions =====
 comprobar_bind9() { 
     if dpkg -l | grep -q "bind9"; then
         return 0  # Verdadero
     else
-        echo "bind9 no está instalado."
+        echo "BIND9 no está instalado."
         return 1  # Falso
     fi
 }
@@ -61,32 +61,44 @@ startservice() {
     # Crear archivo de zona directa
     echo "Creando archivo de zona directa para $dominio..."
     sudo tee /etc/bind/zones/db.$dominio > /dev/null <<EOL
-\$TTL 604800
-@   IN  SOA ns1.$dominio. root.$dominio. (
+;
+; Archivo de configuracion para la zona directa de $dominio
+;
+\$TTL 86400
+@   IN  SOA ns.$dominio. admin.$dominio. (
             $(date +"%Y%m%d%H") ; Serial
-            604800  ; Refresh
-            86400   ; Retry
-            2419200 ; Expire
-            604800) ; Negative Cache TTL
+            3600         ; Refresh
+            1800         ; Retry
+            1209600      ; Expire
+            86400 )      ; Negative Cache TTL
 
-@   IN  NS  ns1.$dominio.
-ns1 IN  A   $ipServidor
-www IN  A   $ipServidor
+; Servidores de nombres
+@       IN  NS  ns.$dominio.
+
+; Registros A (dirección IP)
+ns      IN  A   $ipServidor
+www     IN  A   $ipServidor
 EOL
 
     # Crear archivo de zona inversa
     echo "Creando archivo de zona inversa para $zonaInversa..."
     sudo tee /etc/bind/zones/db.$zonaInversa > /dev/null <<EOL
-\$TTL 604800
-@   IN  SOA ns1.$dominio. root.$dominio. (
+;
+; Archivo de zona inversa para $zonaInversa.x
+;
+\$TTL 86400
+@   IN  SOA ns.$dominio. admin.$dominio. (
             $(date +"%Y%m%d%H") ; Serial
-            604800  ; Refresh
-            86400   ; Retry
-            2419200 ; Expire
-            604800) ; Negative Cache TTL
+            3600         ; Refresh
+            1800         ; Retry
+            1209600      ; Expire
+            86400 )      ; Negative Cache TTL
 
-@   IN  NS  ns1.$dominio.
-$d   IN  PTR ns1.$dominio.
+; Servidores de nombres
+@       IN  NS  ns.$dominio.
+
+; Registros PTR (IP a nombre de dominio)
+$d   IN  PTR  $dominio.
 EOL
 
     echo "Servicio BIND9 configurado correctamente."
