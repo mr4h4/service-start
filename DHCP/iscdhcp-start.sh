@@ -28,6 +28,7 @@ dhcpconf() {
     read -p "dns-server-ip >> " dns_server_ip
     read -p "domain >> " domain
     read -p "authoritative (y/n) >> " authoritative
+    read -p "one-lease-per-client (y/n) >> " one_lease_per_client
 
     startservice
 }
@@ -48,7 +49,7 @@ startyesornot() {
     read -p "¿Quiere iniciar directamente el servicio? (y/n) >> " startyesno
     if [[ $startyesno == "y" || $startyesno == "Y" ]]; then
         service isc-dhcp-server restart
-        sudo tail -f /var/log/syslog & 
+        tail -f /var/log/syslog & 
 
         if systemctl is-active --quiet isc-dhcp-server; then
             echo "Servicio iniciado correctamente."
@@ -65,22 +66,30 @@ startyesornot() {
 
 startservice(){ 
     echo "Creando backup de la configuración actual..."
-    sudo cp /etc/dhcp/dhcpd.conf /etc/dhcp/dhcpd.conf.bak
+    cp /etc/dhcp/dhcpd.conf /etc/dhcp/dhcpd.conf.bak
     sleep 2
 
     echo "Restaurando /etc/dhcp/dhcpd.conf..."
-    sudo rm /etc/dhcp/dhcpd.conf
+    rm /etc/dhcp/dhcpd.conf
     sleep 2
     
     if [[ $authoritative == "y" || $authoritative == "Y" ]]; then
-        echo "authoritative;" | sudo tee -a /etc/dhcp/dhcpd.conf
+        echo "authoritative;" | tee -a /etc/dhcp/dhcpd.conf
     elif [[ $authoritative == "n" || $authoritative == "N" ]]; then
-        echo "#authoritative;" | sudo tee -a /etc/dhcp/dhcpd.conf
+        echo "#authoritative;" | tee -a /etc/dhcp/dhcpd.conf
     else
         echo "Parametro invalido. Se interpretará como 'no'."
     fi
 
-    sudo tee /etc/dhcp/dhcpd.conf > /dev/null <<EOL
+     if [[ $ == "y" || $one_lease_per_client == "Y" ]]; then
+        echo "one_lease_per_client;" | tee -a /etc/dhcp/dhcpd.conf
+    elif [[ $one_lease_per_client == "n" || $one_lease_per_client == "N" ]]; then
+        echo "#one_lease_per_client;" | tee -a /etc/dhcp/dhcpd.conf
+    else
+        echo "Parametro invalido. Se interpretará como 'no'."
+    fi
+
+    tee /etc/dhcp/dhcpd.conf > /dev/null <<EOL
     default-lease-time $leasetime;
     max-lease-time $maxleasetime;
 
@@ -98,9 +107,15 @@ EOL
 }
 
 ## ===== Start =====
-echo "Comprobando instalación de isc-dhcp-server..."
-sleep 2
-comprobar_isc_dhcp
+if [[ $(whoami) -eq "root" ]]; then
+    echo "Comprobando instalación de isc-dhcp-server..."
+    sleep 2
+    comprobar_isc_dhcp
+else
+    echo "Por favor, inicia el script como root"
+    exit 1
+fi
+
 
 if [ $? -eq 0 ]; then
     echo "Iniciando configuración del servicio..."
@@ -109,7 +124,7 @@ if [ $? -eq 0 ]; then
 else
     echo "Instalando isc-dhcp-server..."
     sleep 2
-    sudo apt-get install isc-dhcp-server
+    apt-get install isc-dhcp-server
     sleep 2
     confyesornot
 fi
