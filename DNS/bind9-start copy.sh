@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # ===== General Information =====
-# Script Name: bind9-start
-# Description: Automatiza la instalación, configuración final y puesta en marcha de un servicio DNS. (Linux Mint)
+# Script Name: isc-dhcp-start
+# Description: Automatiza la instalación, configuración final y puesta en marcha de un servicio DHCP. (Linux Mint)
 # Version: 2.0
 # Author: mr4h4 - h3rhex
 
