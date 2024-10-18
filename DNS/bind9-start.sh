@@ -138,27 +138,24 @@ startyesornot() {
 }
 
 ## ===== Start =====
-# Asegúrate de que el script tenga permisos de ejecución antes de ejecutarlo
-if [[ $(id -u) -eq 0 ]]; then
-    echo "Comprobando instalación de BIND9..."
+if [[ $(whoami) -eq "root" ]]; then
+    echo "Comprobando instalación de isc-dhcp-server..."
     sleep 2
     comprobar_bind9
-
-    if [ $? -eq 0 ]; then
-        echo "Iniciando configuración del servicio..."
-        sleep 2
-        bindconf
-    else
-        echo "Instalando BIND9..."
-        sleep 2
-        if apt-get install -y bind9; then
-            confyesornot
-        else
-            echo "Error al instalar BIND9. Asegúrate de tener acceso a Internet y permisos adecuados."
-            exit 1
-        fi
-    fi
 else
     echo "Por favor, inicia el script como root"
     exit 1
+fi
+
+
+if [ $? -eq 0 ]; then
+    echo "Iniciando configuración del servicio..."
+    sleep 2
+    bindconf
+else
+    echo "Instalando bind9..."
+    sleep 2
+    apt-get install bind9 -y
+    sleep 2
+    confyesornot
 fi

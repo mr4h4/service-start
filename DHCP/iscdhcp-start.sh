@@ -124,7 +124,7 @@ if [ $? -eq 0 ]; then
 else
     echo "Instalando isc-dhcp-server..."
     sleep 2
-    apt-get install isc-dhcp-server
+    apt-get install isc-dhcp-server -y
     sleep 2
     confyesornot
 fi
