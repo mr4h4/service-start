@@ -4,6 +4,7 @@ Este script automatiza la instalación y configuración de un servidor **ISC DHC
 
 ⚙️ **Configuración rápida y asistida desde consola**: podrás definir fácilmente los siguientes parámetros:
 
+- `interface`: Configuración de la interfaz de red
 - `authoritative`: Habilita o no el modo autoritativo (`True` o `False`)
 - `default-lease-time` y `max-lease-time`: Duración de las concesiones DHCP
 - `network-ip`, `netmask`, `broadcast`, `gateway`: Configuración de red

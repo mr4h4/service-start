@@ -22,7 +22,7 @@ dhcpconf() {
     read -p "dns-server-ip (default 8.8.8.8) >> " dns_server_ip
     read -p "domain () >> " domain
     read -p "authoritative (y/n) >> " authoritative
-    read -p "Interfaz de red (ej. eth0, wlan0, etc.) >> " interface
+    read -p "interface (ej. eth0, wlan0, etc.) >> " interface
 
     startservice
 }
