@@ -12,7 +12,7 @@ Este script automatiza la instalación y configuración de un servidor **ISC DHC
 - `dns-server`: Servidor DNS (por defecto: `8.8.8.8`)
 - `domain`: Nombre de dominio
 
-> ⚠️ Puedes dejar algunos parámetros en blanco pulsando `ENTER`, pero **algunos son obligatorios** para que el servicio funcione correctamente.
+> ⚠️ Puedes dejar parámetros en blanco pulsando `ENTER`, pero **algunos son obligatorios** para que el servicio funcione correctamente.
 
 ---
 
