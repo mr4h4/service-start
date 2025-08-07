@@ -20,7 +20,7 @@ Este script automatiza la instalación y configuración de un servidor **ISC DHC
 
 1. **Clona el repositorio**:
    ```bash
-   git clone https://github.com/mr4h4/service-start
+   git clone https://github.com/mr4h4/isc-dhcp-setup
    ```
 
 2. **Ejecuta el script**:
