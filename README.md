@@ -1,32 +1,53 @@
-# Service Start
+## ISC-DHCP-SETUP
 
-## Descripción
+Este script automatiza la instalación y configuración de un servidor **ISC DHCP** en sistemas basados en Debian/Ubuntu.
 
-**Service Start** es un proyecto que simplifica el lanzamiento y la configuración de servicios comunes como HTTP, DHCP, DNS y más. Con scripts automatizados, facilita la configuración de estos servicios en sistemas operativos Linux y Windows, permitiendo a los usuarios poner en marcha sus entornos de manera rápida y eficiente.
+⚙️ **Configuración rápida y asistida desde consola**: podrás definir fácilmente los siguientes parámetros:
 
-## Características
+- `authoritative`: Habilita o no el modo autoritativo (`True` o `False`)
+- `default-lease-time` y `max-lease-time`: Duración de las concesiones DHCP
+- `network-ip`, `netmask`, `broadcast`, `gateway`: Configuración de red
+- `ip range` (inicio y fin): Rango de direcciones IP asignables
+- `dns-server`: Servidor DNS (por defecto: `8.8.8.8`)
+- `domain`: Nombre de dominio
 
-- **Soporte Multisistema**: Funciona en Linux y Windows.
-- **Servicios Comunes**: Configura fácilmente servicios como HTTP, DHCP, DNS, entre otros.
-- **Automatización**: Scripts preconfigurados que reducen la necesidad de configuración manual.
+> ⚠️ Puedes dejar algunos parámetros en blanco pulsando `ENTER`, pero **algunos son obligatorios** para que el servicio funcione correctamente.
 
-## Requisitos
+---
 
-- **Linux**: Distribuciones modernas (Ubuntu, LinuxMint, etc.)
-- **Windows**: Windows 10 o superior.
-- **Python**: Versión 3.6 o superior (si aplica).
-- **Acceso de Administrador**: Para instalar y configurar servicios.
+## 🚀 Instalación
 
-## Instalación
-
-1. **Clonar el repositorio**:
+1. **Clona el repositorio**:
    ```bash
-   git clone https://github.com/mr4h4/service-start.git
+   git clone https://github.com/mr4h4/service-start
    ```
 
-2. **Ejecutar script**:
+2. **Ejecuta el script**:
    ```bash
-   cd service-start
+   cd isc-dhcp-setup
+   sudo ./setup.sh
    ```
-- Entras en la carpeta del servicio que deseas lanzar y ejecutas el script.
 
+> 🛠️ El script comprobará si `isc-dhcp-server` está instalado. Si no lo está, lo instalará automáticamente y te guiará paso a paso para completar la configuración del servicio.
+
+---
+
+## ✅ Verificación del servicio (opcional)
+
+Una vez completada la instalación y configuración, puedes verificar el estado del servicio con:
+
+```bash
+sudo systemctl status isc-dhcp-server
+```
+
+O revisar los logs del sistema para depurar posibles errores:
+
+```bash
+journalctl -u isc-dhcp-server -f
+```
+
+---
+
+📦 Compatible con entornos locales y pequeñas redes LAN que necesiten una configuración rápida de DHCP sin intervención manual compleja.
+
+---

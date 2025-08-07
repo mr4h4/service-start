@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# ===== General Information =====
-# Script Name: isc-dhcp-start
-# Description: Automatiza la instalación, configuración final y puesta en marcha de un servicio DHCP. (Linux Mint)
-# Version: 2.0
-# Author: mr4h4 - h3rhex
-
 # ===== Functions =====
 comprobar_isc_dhcp() { 
     if dpkg -l | grep -q "isc-dhcp-server"; then
@@ -25,10 +19,10 @@ dhcpconf() {
     read -p "range (last) >> " rangoB
     read -p "default-lease-time >> " leasetime
     read -p "max-lease-time >> " maxleasetime
-    read -p "dns-server-ip >> " dns_server_ip
-    read -p "domain >> " domain
+    read -p "dns-server-ip (default 8.8.8.8) >> " dns_server_ip
+    read -p "domain () >> " domain
     read -p "authoritative (y/n) >> " authoritative
-    read -p "one-lease-per-client (y/n) >> " one_lease_per_client
+    read -p "Interfaz de red (ej. eth0, wlan0, etc.) >> " interface
 
     startservice
 }
@@ -48,11 +42,11 @@ confyesornot() {
 startyesornot() {
     read -p "¿Quiere iniciar directamente el servicio? (y/n) >> " startyesno
     if [[ $startyesno == "y" || $startyesno == "Y" ]]; then
-        service isc-dhcp-server restart
+        sudo systemctl restart isc-dhcp-server
         tail -f /var/log/syslog & 
 
         if systemctl is-active --quiet isc-dhcp-server; then
-            echo "Servicio iniciado correctamente."
+            echo "Servicio insed -i '/^INTERFACESv4=/d' /etc/default/isc-dhcp-servericiado correctamente."
         else
             echo "El servicio no se ha iniciado correctamente."
         fi
@@ -66,48 +60,64 @@ startyesornot() {
 
 startservice(){ 
     echo "Creando backup de la configuración actual..."
-    cp /etc/dhcp/dhcpd.conf /etc/dhcp/dhcpd.conf.bak
+    sudo cp /etc/dhcp/dhcpd.conf /etc/dhcp/dhcpd.conf.bak
     sleep 2
 
     echo "Restaurando /etc/dhcp/dhcpd.conf..."
-    rm /etc/dhcp/dhcpd.conf
+    sudo rm /etc/dhcp/dhcpd.conf
     sleep 2
     
+    # Agregar el parámetro 'authoritative' si el usuario lo elige
     if [[ $authoritative == "y" || $authoritative == "Y" ]]; then
-        echo "authoritative;" | tee -a /etc/dhcp/dhcpd.conf
+        echo "authoritative;" | sudo tee -a /etc/dhcp/dhcpd.conf > /dev/null
     elif [[ $authoritative == "n" || $authoritative == "N" ]]; then
-        echo "#authoritative;" | tee -a /etc/dhcp/dhcpd.conf
+        echo "#authoritative;" | sudo tee -a /etc/dhcp/dhcpd.conf > /dev/null
     else
         echo "Parametro invalido. Se interpretará como 'no'."
     fi
 
-     if [[ $ == "y" || $one_lease_per_client == "Y" ]]; then
-        echo "one_lease_per_client;" | tee -a /etc/dhcp/dhcpd.conf
-    elif [[ $one_lease_per_client == "n" || $one_lease_per_client == "N" ]]; then
-        echo "#one_lease_per_client;" | tee -a /etc/dhcp/dhcpd.conf
-    else
-        echo "Parametro invalido. Se interpretará como 'no'."
+    # Si no se proporciona un DNS, se asigna 8.8.8.8 como valor predeterminado
+    if [ -z "$dns_server_ip" ]; then
+        dns_server_ip="8.8.8.8"
     fi
 
-    tee /etc/dhcp/dhcpd.conf > /dev/null <<EOL
-    default-lease-time $leasetime;
-    max-lease-time $maxleasetime;
+    # Si no se proporciona un dominio, no escribir nada en el archivo
+    if [ -z "$domain" ]; then
+        domain_line=""
+    else
+        domain_line="option domain-name \"$domain\";"
+    fi
 
-    subnet $dirRed netmask $netmask {
-        range $rangoA $rangoB;
-        option domain-name-servers $dns_server_ip, 8.8.8.8;
-        option domain-name "$domain";
-        option subnet-mask $netmask;
-        option routers $gateway;
-        option broadcast-address $broadcast;
-    }
+    # Configurar la interfaz de red para que el servicio escuche en ella
+    if [ -z "$interface" ]; then
+        echo "No se ha especificado ninguna interfaz, utilizando la predeterminada."
+        interface="eth0"  # Default interface in case user leaves it blank
+    fi
+
+    # Escribir la interfaz en el archivo /etc/default/isc-dhcp-server
+    sed -i '/^INTERFACESv4=/d' /etc/default/isc-dhcp-server
+    echo "INTERFACESv4=\"$interface\"" | sudo tee -a /etc/default/isc-dhcp-server > /dev/null
+
+    # Agregar la configuración al archivo dhcpd.conf sin sobrescribir lo anterior
+    sudo tee -a /etc/dhcp/dhcpd.conf > /dev/null <<EOL
+default-lease-time $leasetime;
+max-lease-time $maxleasetime;
+
+subnet $dirRed netmask $netmask {
+    range $rangoA $rangoB;
+    option domain-name-servers $dns_server_ip;
+    $domain_line
+    option subnet-mask $netmask;
+    option routers $gateway;
+    option broadcast-address $broadcast;
+}
 EOL
 
     startyesornot
 }
 
 ## ===== Start =====
-if [[ $(whoami) -eq "root" ]]; then
+if [[ $(whoami) == "root" ]]; then
     echo "Comprobando instalación de isc-dhcp-server..."
     sleep 2
     comprobar_isc_dhcp
@@ -124,7 +134,7 @@ if [ $? -eq 0 ]; then
 else
     echo "Instalando isc-dhcp-server..."
     sleep 2
-    apt-get install isc-dhcp-server -y
+    sudo apt-get install isc-dhcp-server -y
     sleep 2
     confyesornot
 fi
